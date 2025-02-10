@@ -18,8 +18,10 @@ class Game {
   ) {
     this.status = Game.STATUS.idle;
     this.initialState = initialState;
+
     this.state = initialState.map((row) => [...row]);
     this.score = 0;
+    this.loadGame();
   }
 
   getScore() {
@@ -38,12 +40,14 @@ class Game {
     this.status = Game.STATUS.playing;
     this.getRandomBlock();
     this.getRandomBlock();
+    this.saveGame();
   }
 
   restart() {
     this.status = Game.STATUS.idle;
     this.state = this.initialState.map((row) => [...row]);
     this.score = 0;
+    this.saveGame();
   }
 
   getRandomBlock() {
@@ -62,6 +66,7 @@ class Game {
         emptyBlock[Math.floor(Math.random() * emptyBlock.length)];
 
       this.state[randomR][randomC] = Math.random() < 0.9 ? 2 : 4;
+      this.saveGame();
     }
   }
 
@@ -121,6 +126,7 @@ class Game {
     if (moved) {
       this.getRandomBlock();
       this.checkGameOverOrWin();
+      this.saveGame();
     }
   }
 
@@ -186,6 +192,28 @@ class Game {
     }
 
     return false;
+  }
+
+  saveGame() {
+    localStorage.setItem('2048-state', JSON.stringify(this.state));
+    localStorage.setItem('2048-score', this.score);
+    localStorage.setItem('2048-status', this.status);
+  }
+
+  loadGame() {
+    const savedState = JSON.parse(localStorage.getItem('2048-state'));
+    const savedScore = localStorage.getItem('2048-score');
+    const savedStatus = localStorage.getItem('2048-status');
+
+    if (savedState && savedScore !== null && savedStatus) {
+      this.state = savedState;
+      this.score = parseInt(savedScore, 10);
+      this.status = savedStatus;
+    } else {
+      this.state = this.initialState.map((row) => [...row]);
+      this.score = 0;
+      this.status = Game.STATUS.idle;
+    }
   }
 }
 
